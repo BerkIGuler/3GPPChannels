@@ -1,4 +1,4 @@
-from src.utils import plot_channel_distribution, plot_power_distribution, plot_angle_magnitude_distribution
+from src.utils import plot_channel_distribution, plot_power_distribution, plot_angle_magnitude_distribution, plot_power_distribution_and_cdf
 from src.tdl import generate_tdl_channels
 
 
@@ -11,7 +11,7 @@ RX_ANTENNA_COUNT = 1
 CARRIER_FREQ = 3.5e9
 DOPPLER_SHIFT = 100
 DELAY_SPREAD = 500
-PROFILE = 'A'
+PROFILE = 'B'
 NUM_CHANNELS = 10000
 SHOW_PROGRESS = True
 
@@ -30,8 +30,9 @@ channel_matrices = generate_tdl_channels(
     show_progress=SHOW_PROGRESS,
 )
 
-print(channel_matrices.shape)
+print("Channel matrices shape:", channel_matrices.shape)
 
 plot_channel_distribution(channel_matrices)
 plot_power_distribution(channel_matrices)
 plot_angle_magnitude_distribution(channel_matrices)
+plot_power_distribution_and_cdf(channel_matrices, log_scale=True)

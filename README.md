@@ -1,6 +1,6 @@
 # 3GPP TDL Channels
 
-Generate frequency-domain TDL (Tapped Delay Line) channel matrices using [NeoRadium](https://interdigitalinc.github.io/NeoRadium/), with config-driven dataset generation and optional plotting.
+Generate frequency-domain TDL (Tapped Delay Line) channel matrices using [NeoRadium](https://interdigitalinc.github.io/NeoRadium/), with config-driven dataset generation and optional plotting. By default, generated channels are normalized by their mean power (so that E[|H|²] = 1).
 
 ## Dependencies
 
@@ -28,12 +28,13 @@ python generate_tdl_dataset.py path/to/config.yaml -o path/to/output
 - **Config:** Edit `configs/tdl_dataset.yaml` to set `delay_spreads`, `max_doppler_shifts`, `num_channels_per_config`, and other parameters.
 - **Output:** One file per pair (e.g. `delay_spread_25_doppler_100.npy`) plus `metadata.yaml` listing the config and generated files.
 
-### Single run and plotting
+### Plot scripts
 
-Use `plot_tdl_channels.py` to generate a batch of channels with fixed parameters and plot their distribution (real/imag, power, angle/magnitude). Adjust the constants at the top of the script, then run:
+- **`plot_tdl_channel_specs.py`** — Generates channels for a single TDL profile (set `PROFILE` at the top), then plots real/imag, power, angle/magnitude, and power+CDF. Tune the constants and run `python plot_tdl_channel_specs.py`.
+- **`plot_tdl_channel_specs_compare_profiles.py`** — Generates channels for profiles A, B, C, D, and E, prints mean power per profile, then shows the same four plot types in a 2×5 or 1×5 grid so you can compare profiles side by side. Run `python plot_tdl_channel_specs_compare_profiles.py`.
 
-```bash
-python plot_tdl_channels.py
-```
+Plotting helpers live in `src.utils` (single-channel and multi-profile variants).
 
-From Python you can call `generate_tdl_channels()` from `src.tdl` directly; it returns an array of shape `(num_channels, L, K, Nr, Nt)`.
+### Python API
+
+From Python you can call `generate_tdl_channels()` from `src.tdl` directly; it returns an array of shape `(num_channels, L, K, Nr, Nt)`. Pass `normalize_mean_power=False` to keep the raw NeoRadium scale (mean power typically ~1–2 depending on profile).

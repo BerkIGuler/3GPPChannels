@@ -17,9 +17,13 @@ def generate_tdl_channels(
     delay_spread: int = 500,
     profile: str = "A",
     show_progress: bool = True,
+    normalize_mean_power: bool = True,
     **channel_kwargs,
 ) -> np.ndarray:
     """Generate TDL channel matrices over multiple slots.
+
+    With NeoRadium defaults, mean power E[|H|^2] is typically ~1–2 depending on profile
+    (path powers are normalized; combined channel power varies with number of paths and tap overlap).
 
     Returns an array of shape (num_channels, L, K, Nr, Nt) of complex channel matrices.
     """
@@ -44,4 +48,9 @@ def generate_tdl_channels(
         channel_matrices.append(channel.getChannelMatrix())
         channel.goNext()
 
-    return np.array(channel_matrices)
+    out = np.array(channel_matrices)
+    if normalize_mean_power:
+        scale = np.sqrt(np.mean(np.abs(out) ** 2))
+        if scale > 0:
+            out = out / scale
+    return out
