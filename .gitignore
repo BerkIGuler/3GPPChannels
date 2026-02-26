@@ -1,3 +1,4 @@
 NeoRadium/
 **/__pycache__/
-datasets/
+*.npy
+*metadata.yaml
