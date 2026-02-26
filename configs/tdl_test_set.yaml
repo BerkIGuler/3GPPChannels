@@ -1,0 +1,21 @@
+# TDL test set for NMSE vs. Doppler and NMSE vs. Delay spread
+# Same base params as train/val; two modes via doppler_sweep / delay_spread_sweep.
+
+delay_profile: "E"
+num_channels_per_config: 1000
+random_seed: 456
+start_rb: 0
+num_rbs: 10
+spacing: 15
+tx_antenna_count: 1
+rx_antenna_count: 1
+carrier_freq: 3.5e9
+show_progress: true
+
+# 1) NMSE vs. Doppler (fixed delay spread): fix delay_spread, sweep doppler
+delay_spread_fixed: [50, 150, 300]   # ns: low / medium / high
+doppler_sweep: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]   # Hz
+
+# 2) NMSE vs. Delay spread (fixed Doppler): fix doppler, sweep delay spread
+doppler_fixed: [100, 300, 700]       # Hz: low / medium / high
+delay_spread_sweep: [25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300]   # ns

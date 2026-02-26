@@ -2,7 +2,7 @@
 # TDL-A train/val channel dataset generation config
 # For each (delay_spread, max_doppler_shift) pair we generate num_channels_per_config channel matrices.
 
-delay_profile: "A"
+delay_profile: "E"
 num_channels_per_config: 417  # amounts to 100k channels in total
 random_seed: 123
 start_rb: 0
