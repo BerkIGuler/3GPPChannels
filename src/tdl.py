@@ -18,9 +18,29 @@ def generate_tdl_channels(
     profile: str = "A",
     show_progress: bool = True,
     normalize_mean_power: bool = True,
+    slots_per_channel: int = 1,
+    sos_type: str = "Xiao",
+    sos_num_sins: int = 32,
     **channel_kwargs,
 ) -> np.ndarray:
     """Generate TDL channel matrices over multiple slots.
+
+    NeoRadium advances time by one **slot** per `goNext()`. Slot duration is determined
+    by **spacing** (subcarrier spacing): 15 kHz → 1 slot = 1 ms; 30 kHz → 0.5 ms; etc.
+    For low Doppler, use spacing=15 and optionally slots_per_channel > 1 so consecutive
+    channel matrices are further apart in time (less variation).
+
+    Within-slot correlation (across OFDM symbols): NeoRadium uses a Sum-of-Sinusoids (SOS)
+    method for Doppler. Use sos_type='GMEDS1' (default) for smooth, deterministic
+    evolution; avoid 'Xiao' which can give less smooth transitions. Increasing
+    sos_num_sins (default 64) improves correlation at short lags (consecutive symbols).
+
+    slots_per_channel: advance this many slots between each captured channel matrix
+        (default 1). E.g. slots_per_channel=5 with spacing=15 gives one channel every 5 ms.
+
+    sos_type: passed to NeoRadium as sosType ('GMEDS1' or 'Xiao').
+    sos_num_sins: passed to NeoRadium as sosNumSins (number of sinusoids; default 64 for
+        better within-slot correlation than NeoRadium's default 32).
 
     With NeoRadium defaults, mean power E[|H|^2] is typically ~1–2 depending on profile
     (path powers are normalized; combined channel power varies with number of paths and tap overlap).
@@ -39,6 +59,8 @@ def generate_tdl_channels(
         txAntennaCount=tx_antenna_count,
         rxAntennaCount=rx_antenna_count,
         seed=random_seed,
+        sosType=sos_type,
+        sosNumSins=sos_num_sins,
         **channel_kwargs,
     )
 
@@ -46,7 +68,9 @@ def generate_tdl_channels(
     iterator = tqdm(range(num_channels), desc="TDL channels") if show_progress else range(num_channels)
     for _ in iterator:
         channel_matrices.append(channel.getChannelMatrix())
-        channel.goNext()
+        for _ in range(slots_per_channel):
+            channel.goNext()
+
 
     out = np.array(channel_matrices)
     if normalize_mean_power:
