@@ -7,6 +7,7 @@ Each subfolder contains one .npy file for every (delay_spread, doppler_shift)
 pair drawn from its group, plus a metadata.yaml.
 """
 import argparse
+import gc
 from itertools import product
 from pathlib import Path
 
@@ -29,7 +30,6 @@ DOPPLER_GROUPS = [
 
 def _base_kwargs(config: dict) -> dict:
     return {
-        "num_channels": config["num_channels_per_config"],
         "random_seed": config.get("random_seed", 123),
         "start_rb": config.get("start_rb", 0),
         "num_rbs": config.get("num_rbs", 10),
@@ -47,25 +47,35 @@ def run(config_path: Path, output_dir: Path) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     base = _base_kwargs(config)
+    num_channels_per_group = config["num_channels_per_group"]
 
-    for (delay_tag, delay_key), (doppler_tag, doppler_key) in product(
-        DELAY_GROUPS, DOPPLER_GROUPS
-    ):
+    groups = list(product(DELAY_GROUPS, DOPPLER_GROUPS))
+    for group_idx, ((delay_tag, delay_key), (doppler_tag, doppler_key)) in enumerate(groups, 1):
         delay_spreads = config[delay_key]
         doppler_shifts = config[doppler_key]
         folder_name = f"{delay_tag}_{doppler_tag}"
         folder = output_dir / folder_name
         folder.mkdir(parents=True, exist_ok=True)
 
+        pairs = list(product(delay_spreads, doppler_shifts))
+        num_channels_per_config = num_channels_per_group // len(pairs)
+
+        print(f"\n[{group_idx}/{len(groups)}] {folder_name}  "
+              f"({len(pairs)} configs × {num_channels_per_config} channels)")
+
         generated = []
-        for delay_spread, doppler_shift in product(delay_spreads, doppler_shifts):
+        for idx, (delay_spread, doppler_shift) in enumerate(pairs, 1):
             name = f"delay_{delay_spread}_doppler_{doppler_shift}.npy"
+            print(f"  [{idx}/{len(pairs)}] {folder_name}/{name}")
             channels = generate_tdl_channels(
                 **base,
+                num_channels=num_channels_per_config,
                 delay_spread=delay_spread,
                 doppler_shift=doppler_shift,
             )
             np.save(folder / name, channels)
+            del channels
+            gc.collect()
             generated.append({
                 "file": name,
                 "delay_spread_ns": delay_spread,
@@ -75,6 +85,7 @@ def run(config_path: Path, output_dir: Path) -> None:
         save_config(folder / "metadata.yaml", {
             "config_path": str(Path(config_path).resolve()),
             "folder": folder_name,
+            "num_channels_per_config": num_channels_per_config,
             "delay_spreads": delay_spreads,
             "doppler_shifts": doppler_shifts,
             "config": config,
