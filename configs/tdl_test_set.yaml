@@ -2,7 +2,7 @@
 # Same base params as train/val; two modes via doppler_sweep / delay_spread_sweep.
 
 delay_profile: "A"
-num_channels_per_config: 1000
+num_channels_per_group: 10000
 random_seed: 456
 start_rb: 0
 num_rbs: 10
