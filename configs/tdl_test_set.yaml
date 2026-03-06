@@ -12,10 +12,10 @@ rx_antenna_count: 1
 carrier_freq: 3.5e9
 show_progress: true
 
-# 1) NMSE vs. Doppler (fixed delay spread): fix delay_spread, sweep doppler
-delay_spread_fixed: [100, 500, 900]   # ns: low / medium / high (from train delay_spreads)
-doppler_sweep: [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600]   # Hz (train max_doppler_shifts)
+low_delay_spread: [10, 50, 100, 150, 200, 250, 300]
+moderate_delay_spread: [350, 400, 450, 500, 550, 600, 650]
+high_delay_spread: [700, 750, 800, 850, 900, 950, 1000]
 
-# 2) NMSE vs. Delay spread (fixed Doppler): fix doppler, sweep delay spread
-doppler_fixed: [100, 300, 500]       # Hz: low / medium / high (from train max_doppler_shifts)
-delay_spread_sweep: [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]   # ns (train delay_spreads)
+low_doppler: [10, 50, 100, 150, 200]
+moderate_doppler: [250, 300, 350, 400]
+high_doppler: [450, 500, 550, 600]
